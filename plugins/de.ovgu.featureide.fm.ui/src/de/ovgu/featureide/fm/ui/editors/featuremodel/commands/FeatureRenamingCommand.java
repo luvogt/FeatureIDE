@@ -64,22 +64,14 @@ public class FeatureRenamingCommand extends Command {
 			return false;
 		}
 
-		if (featureModel.getSourceFile() == null) {
+		if ((featureModel.getSourceFile() == null) || (featureModel.getSourceFile().toUri() == null) || (FMComposerManager.getFMComposerExtension(
+				ResourcesPlugin.getWorkspace().getRoot().findFilesForLocationURI(featureModel.getSourceFile().toUri())[0].getProject()) == null)) {
 			return false;
 		} else {
-			if (featureModel.getSourceFile().toUri() == null) {
-				return false;
-			} else {
-				if (FMComposerManager.getFMComposerExtension(
-						ResourcesPlugin.getWorkspace().getRoot().findFilesForLocationURI(featureModel.getSourceFile().toUri())[0].getProject()) == null) {
-					return false;
-				} else {
-					return FMComposerManager
-							.getFMComposerExtension(
-									ResourcesPlugin.getWorkspace().getRoot().findFilesForLocationURI(featureModel.getSourceFile().toUri())[0].getProject())
-							.isValidFeatureName(newName);
-				}
-			}
+			return FMComposerManager
+					.getFMComposerExtension(
+							ResourcesPlugin.getWorkspace().getRoot().findFilesForLocationURI(featureModel.getSourceFile().toUri())[0].getProject())
+					.isValidFeatureName(newName);
 		}
 	}
 
