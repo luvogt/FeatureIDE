@@ -18,48 +18,36 @@
  *
  * See http://featureide.cs.ovgu.de/ for further information.
  */
-package de.ovgu.featureide.fm.core;
+package de.ovgu.featureide.fm.ui.utils;
 
-import java.util.regex.Pattern;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
- * Definition of valid operator names for constraint expressions.
+ * Enums all Antenna directives so that Eclipse can autocomplete them.
  *
- * @author Fabian Benduhn
+ * @author Iris-Maria Banciu
  */
-public class Operator {
 
-	private static final StringBuilder sb = new StringBuilder();
+public enum AntennaEnum {
+	IF("if"), ENDIF("endif"), IFDEF("ifdef"), IFNDEF("ifndef"), ELIF("elif"), ELIFDEF("elifdef"), ELIFNDEF("elifndef"), ELSE("else"), CONDITION(
+			"condition"), DEFINE("define"), UNDEFINE("undefine");
 
-	public static final String[] NAMES = { "Not", "And", "Or", "Implies", "Iff", "(", ")" };
+	private String text;
 
-	static {
-		sb.append("(");
-		for (final String keyword : NAMES) {
-			if ((keyword == "(") || (keyword == ")")) {
-				sb.append("\\" + keyword);
-			} else {
-				sb.append("\\b" + Pattern.quote(keyword.toLowerCase()) + "\\b");
-			}
-			sb.append("|");
-		}
-		sb.setCharAt(sb.length() - 1, ')');
+	AntennaEnum(String text) {
+		this.text = text;
 	}
 
-	public static final String REGEX = sb.toString();
-
-	/**
-	 * @param name
-	 * @return true if name is operator name
-	 */
-	public static boolean isOperatorName(String name) {
-
-		for (final String operator : NAMES) {
-			if (name.toLowerCase().equals(operator.toLowerCase())) {
-				return true;
-			}
-		}
-		return false;
+	public String getText() {
+		return text;
 	}
 
+	public static List<String> getAllDirectives() {
+		final List<String> list = new ArrayList<String>();
+		for (final AntennaEnum d : AntennaEnum.values()) {
+			list.add(d.text);
+		}
+		return list;
+	}
 }

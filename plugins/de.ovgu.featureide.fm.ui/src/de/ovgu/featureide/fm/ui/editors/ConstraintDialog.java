@@ -183,7 +183,7 @@ public class ConstraintDialog implements GUIDefaults {
 		 * @author Marcus Pinnecke
 		 */
 		public enum HeaderDescriptionImage {
-			ERROR, WARNING, INFO, NONE
+		ERROR, WARNING, INFO, NONE
 		}
 
 		private static final String STRING_HEADER_LABEL_DEFAULT = CREATE_NEW_CONSTRAINT;
@@ -521,6 +521,10 @@ public class ConstraintDialog implements GUIDefaults {
 		}
 	}
 
+	public List<String> GetFeatureListFromConstraintDialog() {
+		return FeatureUtils.getExplicitFeatureList(featureModel);
+	}
+
 	/**
 	 * Depending on the current editing mode of this dialog the OK button text will be altered.
 	 */
@@ -684,7 +688,6 @@ public class ConstraintDialog implements GUIDefaults {
 		constraintText.setLayoutData(formDataConstraintText);
 		constraintText.setText(initialConstraint);
 		constraintText.setMargins(10, 5, 3, 5);
-		constraintText.setPossibleWords(Functional.toSet(FeatureUtils.extractFeatureNames(featureModel.getFeatures())));
 
 		constraintText.addModifyListener(new ModifyListener() {
 			@Override
@@ -950,7 +953,7 @@ public class ConstraintDialog implements GUIDefaults {
 				autoActivationCharacters[c] = c;
 			}
 
-			adapter = new ContentProposalAdapter(constraintText, new SimpleSyntaxHighlighterConstraintContentAdapter(),
+			adapter = new ContentProposalAdapter(constraintText, new SimpleSyntaxHighlighterConstraintContentAdapter(this),
 					new ConstraintContentProposalProvider(Functional.toSet(FeatureUtils.extractFeatureNames(featureModel.getFeatures()))), keyStroke,
 					autoActivationCharacters);
 
@@ -974,15 +977,16 @@ public class ConstraintDialog implements GUIDefaults {
 		} else {
 			final NodeReader nodeReader = new NodeReader();
 			final Node constraintNode = nodeReader.stringToNode(text, featureNamesList);
-			if (constraintNode == null) {
+			final boolean properConstraint = constraintNode != null;
+			if (!properConstraint) {
 				update(String.format(StringTable.CONSTRAINT_CONNOT_BE_SAVED, nodeReader.getErrorMessage().getMessage()),
 						HeaderPanel.HeaderDescriptionImage.ERROR, DialogState.SAVE_CHANGES_DISABLED);
-				constraintText.underlineEverything(constraintText.getUnknownWords().isEmpty());
 			} else {
 				if (!validator.validateAsync(constraintNode, onUpdate)) {
 					update(null, null, DialogState.SAVE_CHANGES_DONT_MIND);
 				}
 			}
+			constraintText.updateHighlight(nodeReader.errorType);
 		}
 	}
 }

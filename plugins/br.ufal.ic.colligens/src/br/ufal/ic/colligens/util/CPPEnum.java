@@ -18,48 +18,35 @@
  *
  * See http://featureide.cs.ovgu.de/ for further information.
  */
-package de.ovgu.featureide.fm.core;
+package br.ufal.ic.colligens.util;
 
-import java.util.regex.Pattern;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
- * Definition of valid operator names for constraint expressions.
+ * Enums all Colligen CPP directives so that Eclipse can autocomplete them.
  *
- * @author Fabian Benduhn
+ * @author Mohammed Khaled
+ * @author Iris-Maria Banciu
  */
-public class Operator {
+public enum CPPEnum {
+	IFDEF("ifdef"), IFNOTDEF("ifndef"), ELSE("else"), END("endif"), DEFINE("define"), UNDEFINE("undefine"), IF("if");
 
-	private static final StringBuilder sb = new StringBuilder();
+	private String text;
 
-	public static final String[] NAMES = { "Not", "And", "Or", "Implies", "Iff", "(", ")" };
-
-	static {
-		sb.append("(");
-		for (final String keyword : NAMES) {
-			if ((keyword == "(") || (keyword == ")")) {
-				sb.append("\\" + keyword);
-			} else {
-				sb.append("\\b" + Pattern.quote(keyword.toLowerCase()) + "\\b");
-			}
-			sb.append("|");
-		}
-		sb.setCharAt(sb.length() - 1, ')');
+	CPPEnum(String text) {
+		this.text = text;
 	}
 
-	public static final String REGEX = sb.toString();
-
-	/**
-	 * @param name
-	 * @return true if name is operator name
-	 */
-	public static boolean isOperatorName(String name) {
-
-		for (final String operator : NAMES) {
-			if (name.toLowerCase().equals(operator.toLowerCase())) {
-				return true;
-			}
-		}
-		return false;
+	public String getText() {
+		return text;
 	}
 
+	public static List<String> getAllDirectives() {
+		final List<String> list = new ArrayList<String>();
+		for (final CPPEnum d : CPPEnum.values()) {
+			list.add(d.text + " ");
+		}
+		return list;
+	}
 }

@@ -20,11 +20,15 @@
  */
 package de.ovgu.featureide.fm.ui.editors;
 
+import java.util.Arrays;
+import java.util.List;
+
 import org.eclipse.jface.fieldassist.IControlContentAdapter;
 import org.eclipse.jface.fieldassist.IControlContentAdapter2;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.widgets.Control;
+import org.prop4j.NodeReader;
 
 import de.ovgu.featureide.fm.core.Features;
 
@@ -35,6 +39,15 @@ import de.ovgu.featureide.fm.core.Features;
  * @author Fabian Benduhn
  */
 public class SimpleSyntaxHighlighterConstraintContentAdapter implements IControlContentAdapter, IControlContentAdapter2 {
+
+	ConstraintDialog constraintDialog;
+
+	/**
+	 *
+	 */
+	public SimpleSyntaxHighlighterConstraintContentAdapter(ConstraintDialog cd) {
+		constraintDialog = cd;
+	}
 
 	public enum TextChangeMode {
 		INSERT_TEXT, REPLACE_TEXT, UNKNOWN
@@ -70,8 +83,11 @@ public class SimpleSyntaxHighlighterConstraintContentAdapter implements IControl
 		final SimpleSyntaxHighlightEditor editor = (SimpleSyntaxHighlightEditor) control;
 		final Point selection = editor.getSelection();
 		final String currentText = editor.getText();
+		final List<String> textualSymbols = Arrays.asList(NodeReader.textualSymbols);
 
-		final InsertionResult result = performInsertion(currentText, selection, text);
+		final Boolean isFeature = !textualSymbols.contains(text);
+
+		final InsertionResult result = performInsertion(currentText, selection, text, isFeature);
 
 		editor.setText(result.text);
 		editor.setSelection(result.selection);
@@ -83,7 +99,7 @@ public class SimpleSyntaxHighlighterConstraintContentAdapter implements IControl
 	 * @param text
 	 * @return
 	 */
-	public static InsertionResult performInsertion(final String currentText, final Point selection, final String textToInsert) {
+	public static InsertionResult performInsertion(final String currentText, final Point selection, final String textToInsert, final Boolean isFeature) {
 		String before = "", after = "";
 		String text = textToInsert;
 
@@ -92,7 +108,6 @@ public class SimpleSyntaxHighlighterConstraintContentAdapter implements IControl
 		} else if (text.contains(" ")) {
 			text = "\"" + text + "\"";
 		}
-
 		switch (getMode(selection)) {
 		case INSERT_TEXT: {
 
@@ -123,7 +138,11 @@ public class SimpleSyntaxHighlighterConstraintContentAdapter implements IControl
 			throw new UnsupportedOperationException();
 		}
 
-		if (!before.isEmpty() && !before.endsWith(" ")) {
+		if (!before.isEmpty() && !before.endsWith(" ") && !isFeature) {
+			before += " ";
+		}
+
+		if (!before.isEmpty() && isFeature && !before.endsWith("(")) {
 			before += " ";
 		}
 
@@ -137,10 +156,12 @@ public class SimpleSyntaxHighlighterConstraintContentAdapter implements IControl
 	}
 
 	private static int getSubStringStartIndex(final String currentText, final int x) {
-		int substringStartIndex = Math.max(0, x - 1);
+
+		int substringStartIndex = Math.max(0, x);
 		for (; substringStartIndex > 0; substringStartIndex--) {
-			final char ch = currentText.charAt(substringStartIndex);
+			final char ch = currentText.charAt(substringStartIndex - 1);
 			if ((ch == ' ') || (ch == '(') || (ch == ')')) {
+
 				break;
 			}
 		}
